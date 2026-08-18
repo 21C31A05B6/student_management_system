@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+{% block page_title %}Welcome, {{ user.get_full_name|default:user.username }}{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <p class="text-muted small mb-1">Attendance</p>
+        <h4 class="mb-0">{% if attendance_pct is not None %}{{ attendance_pct }}%{% else %}—{% endif %}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <p class="text-muted small mb-1">Average Score</p>
+        <h4 class="mb-0">{% if avg_pct is not None %}{{ avg_pct }}%{% else %}—{% endif %}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <p class="text-muted small mb-1">Course</p>
+        <h5 class="mb-0">{{ student.course|default:"—" }}</h5>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body">
+        <p class="text-muted small mb-1">Fees Due</p>
+        <h4 class="mb-0">{% if fees_due is not None %}₹{{ fees_due }}{% else %}—{% endif %}</h4>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body p-4">
+    <h6 class="mb-3">My Performance by Subject</h6>
+    <canvas id="marksChart" height="120"></canvas>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-4 d-flex flex-wrap gap-2">
+    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary"><i class="bi bi-person-circle me-2"></i>View Profile</a>
+    <a href="{% url 'attendance:my_attendance' %}" class="btn btn-outline-primary"><i class="bi bi-calendar-check-fill me-2"></i>Attendance</a>
+    <a href="{% url 'exams:my_marks' %}" class="btn btn-outline-primary"><i class="bi bi-clipboard-data-fill me-2"></i>Marks</a>
+    <a href="{% url 'timetable:view' %}" class="btn btn-outline-primary"><i class="bi bi-calendar3-week me-2"></i>Timetable</a>
+    <a href="{% url 'fees:my_fees' %}" class="btn btn-outline-primary"><i class="bi bi-cash-coin me-2"></i>Fees</a>
+    <a href="{% url 'assignments:my_assignments' %}" class="btn btn-outline-primary"><i class="bi bi-journal-text me-2"></i>Assignments</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+Chart.defaults.color = 'rgba(245, 243, 255, 0.85)';
+new Chart(document.getElementById('marksChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ marks_chart_labels|safe }},
+    datasets: [{
+      label: 'Percentage',
+      data: {{ marks_chart_data|safe }},
+      backgroundColor: '#6c5ce7',
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.08)' } },
+      y: { grid: { color: 'rgba(255,255,255,0.08)' }, min: 0, max: 100 }
+    },
+    plugins: { legend: { display: false } }
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load sms_extras %}
+{% block title %}Marks Entry{% endblock %}
+{% block page_title %}Marks Entry{% endblock %}
+{% block content %}
+<div class="card mb-4">
+  <div class="card-body p-4">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Section</label>
+        <select name="section" class="form-select" required>
+          <option value="">Select section</option>
+          {% for s in sections %}
+            <option value="{{ s.id }}" {% if section_id == s.id|stringformat:'s' %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Subject</label>
+        <select name="subject" class="form-select" required>
+          <option value="">Select subject</option>
+          {% for sub in subjects %}
+            <option value="{{ sub.id }}" {% if subject_id == sub.id|stringformat:'s' %}selected{% endif %}>{{ sub.code }} - {{ sub.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Exam</label>
+        <select name="exam" class="form-select" required>
+          <option value="">Select exam</option>
+          {% for e in exams %}
+            <option value="{{ e.id }}" {% if exam_id == e.id|stringformat:'s' %}selected{% endif %}>{{ e.name }} ({{ e.academic_year }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary w-100">Load Students</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if section_id and subject_id and exam_id and not exam_subject %}
+  <div class="alert alert-warning">
+    This subject has no max-marks configured for this exam yet.
+    <a href="{% url 'exams:exam_subject_add' %}">Add it under Exam Management</a> first.
+  </div>
+{% endif %}
+
+{% if students and exam_subject %}
+<div class="card">
+  <div class="card-body p-4">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="section" value="{{ section_id }}">
+      <input type="hidden" name="subject" value="{{ subject_id }}">
+      <input type="hidden" name="exam" value="{{ exam_id }}">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead><tr><th>Student ID</th><th>Name</th><th>Marks (out of {{ exam_subject.max_marks }})</th></tr></thead>
+          <tbody>
+            {% for student in students %}
+            <tr>
+              <td>{{ student.student_id }}</td>
+              <td>{{ student.user.get_full_name|default:student.user.username }}</td>
+              <td style="max-width:140px;">
+                <input type="number" step="0.01" min="0" max="{{ exam_subject.max_marks }}" name="marks_{{ student.id }}"
+                       class="form-control form-control-sm" value="{{ existing|get_item:student.id|default_if_none:'' }}">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" class="btn btn-primary mt-4"><i class="bi bi-check2-circle me-1"></i>Save Marks</button>
+    </form>
+  </div>
+</div>
+{% elif section_id and subject_id and exam_id and exam_subject %}
+  <div class="alert alert-info">No students found in this section.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Parents{% endblock %}
+{% block page_title %}Parent Portal Management{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="text-muted mb-0">Create parent accounts and link them to their children</p>
+  <a href="{% url 'parents:add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Parent</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Username</th>
+          <th>WhatsApp / Phone</th>
+          <th>Relation</th>
+          <th>Linked Children</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in parents %}
+        <tr>
+          <td class="fw-semibold">{{ p.user.get_full_name|default:p.user.username }}</td>
+          <td><code>{{ p.user.username }}</code></td>
+          <td>
+            {% if p.user.phone %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                <i class="bi bi-whatsapp me-1"></i>{{ p.user.phone }}
+              </span>
+            {% else %}
+              <span class="text-muted small">No phone set</span>
+            {% endif %}
+          </td>
+          <td>{{ p.relation }}</td>
+          <td>
+            {% for c in p.children.all %}
+              <span class="badge text-bg-light border me-1">{{ c.student_id }} - {{ c.user.get_full_name }}</span>
+            {% empty %}
+              <span class="text-muted small">—</span>
+            {% endfor %}
+          </td>
+          <td class="text-end">
+            <a href="{% url 'parents:edit' p.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil-square me-1"></i>Edit
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+        {% for s in legacy_parents %}
+        <tr>
+          <td class="fw-semibold">{{ s.parent_name|default:s.user.get_full_name|default:s.user.username }}</td>
+          <td><code>{{ s.user.username }}</code></td>
+          <td>
+            {% if s.parent_phone %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                <i class="bi bi-whatsapp me-1"></i>{{ s.parent_phone }}
+              </span>
+            {% else %}
+              <span class="text-muted small">No phone set</span>
+            {% endif %}
+          </td>
+          <td><span class="badge bg-warning-subtle text-warning border border-warning-subtle">Legacy</span></td>
+          <td>
+            <span class="badge text-bg-light border me-1">{{ s.student_id }} - {{ s.user.get_full_name }}</span>
+          </td>
+          <td class="text-end">
+            <a href="{% url 'students:edit' s.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil-square me-1"></i>Edit Student
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not parents and not legacy_parents %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No parent accounts yet.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Fee Details{% endblock %}
+{% block page_title %}Fee Record - {{ record.student.student_id }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Summary</h6>
+        <dl class="row mb-0">
+          <dt class="col-6">Student</dt><dd class="col-6">{{ record.student.user.get_full_name }}</dd>
+          <dt class="col-6">Academic Year</dt><dd class="col-6">{{ record.academic_year }}</dd>
+          <dt class="col-6">Total Fee</dt><dd class="col-6">₹{{ record.total_amount }}</dd>
+          <dt class="col-6">Paid</dt><dd class="col-6">₹{{ record.paid_amount }}</dd>
+          <dt class="col-6">Remaining</dt><dd class="col-6">₹{{ record.due_amount }}</dd>
+          <dt class="col-6">Status</dt><dd class="col-6"><span class="badge badge-status-{{ record.status|lower }}">{{ record.get_status_display }}</span></dd>
+        </dl>
+        {% if record.due_amount > 0 %}
+        <a href="{% url 'notifications:fee_reminder' record.pk %}" class="btn btn-sm btn-outline-primary mt-3"><i class="bi bi-bell-fill me-1"></i>Send Fee Reminder</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Record Payment</h6>
+        <form method="post">
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label">{{ field.label }}</label>
+              {{ field }}
+            </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-primary">Add Payment</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Payment History</h6>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Receipt #</th><th></th></tr></thead>
+            <tbody>
+              {% for p in payments %}
+              <tr>
+                <td>{{ p.payment_date }}</td><td>₹{{ p.amount }}</td><td>{{ p.get_method_display }}</td><td>{{ p.receipt_number }}</td>
+                <td class="text-end"><a href="{% url 'fees:payment_delete' p.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="text-center text-muted py-3">No payments recorded.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

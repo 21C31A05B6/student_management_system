@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}My Fees{% endblock %}
+{% block page_title %}My Fee Status{% endblock %}
+{% block content %}
+<div class="row g-3">
+  {% for r in records %}
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <h6 class="mb-0">{{ r.academic_year }}</h6>
+          <span class="badge badge-status-{{ r.status|lower }}">{{ r.get_status_display }}</span>
+        </div>
+        <dl class="row mb-0">
+          <dt class="col-6">Total Fee</dt><dd class="col-6">₹{{ r.total_amount }}</dd>
+          <dt class="col-6">Paid</dt><dd class="col-6">₹{{ r.paid_amount }}</dd>
+          <dt class="col-6">Remaining</dt><dd class="col-6">₹{{ r.due_amount }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="alert alert-info">No fee records yet.</div></div>
+  {% endfor %}
+</div>
+{% endblock %}

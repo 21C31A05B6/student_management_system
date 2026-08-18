@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Student QR Badges{% endblock %}
+{% block page_title %}Student Attendance QR Badges{% endblock %}
+{% block content %}
+<div class="card mb-4 no-print">
+  <div class="card-body p-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <form method="get" class="d-flex align-items-center gap-2">
+        <label class="form-label mb-0 fw-semibold">Filter Section:</label>
+        <select name="section" class="form-select w-auto" onchange="this.form.submit()">
+          <option value="">All Sections ({{ students.count }} students)</option>
+          {% for sec in sections %}
+            <option value="{{ sec.id }}" {% if section_id == sec.id|stringformat:'s' %}selected{% endif %}>{{ sec }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-primary">
+          <i class="bi bi-printer-fill me-1"></i>Print All Badges
+        </button>
+        <a href="{% url 'attendance:qr_scan' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Back to QR Attendance
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 print-container">
+  {% for s in students %}
+  <div class="col-md-6 col-lg-4 col-xl-3">
+    <div class="card h-100 text-center border p-3 shadow-sm qr-badge-card" style="background:#fff;">
+      <div class="small fw-bold text-uppercase text-primary mb-1">{{ s.department.code|default:"SMS ACADEMY" }}</div>
+      {% if s.photo %}
+        <img src="{{ s.photo.url }}" class="rounded-circle mx-auto mb-2" width="55" height="55" style="object-fit:cover;">
+      {% else %}
+        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-2" style="width:55px;height:55px;">
+          <i class="bi bi-person-fill text-muted fs-4"></i>
+        </div>
+      {% endif %}
+      <h6 class="mb-0 text-dark fw-bold">{{ s.user.get_full_name|default:s.user.username }}</h6>
+      <span class="badge bg-light text-dark border mb-2">{{ s.student_id }}</span>
+      <p class="small text-muted mb-2">{{ s.course.name }} {% if s.section %}- {{ s.section.name }}{% endif %}</p>
+      
+      <div class="p-2 border rounded bg-white mx-auto d-inline-block shadow-sm">
+        <img src="{% url 'reports:student_qr' s.pk %}" width="130" height="130" alt="QR Code for {{ s.student_id }}">
+      </div>
+      <div class="mt-2 text-muted" style="font-size: 11px; font-family: monospace;">
+        Token: {{ s.qr_token|stringformat:"s"|slice:":8" }}...
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="alert alert-info">No students found. Add students first to generate their QR badges.</div>
+  </div>
+  {% endfor %}
+</div>
+
+<style>
+@media print {
+  .no-print, nav, .sidebar, header, footer, .navbar {
+    display: none !important;
+  }
+  body, .main-content {
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .print-container {
+    display: flex !important;
+    flex-wrap: wrap !important;
+  }
+  .qr-badge-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    border: 1px solid #ddd !important;
+    margin-bottom: 20px;
+  }
+}
+</style>
+{% endblock %}

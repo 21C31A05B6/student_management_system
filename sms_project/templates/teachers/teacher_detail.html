@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}{{ teacher.user.get_full_name }}{% endblock %}
+{% block page_title %}Teacher Profile{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-body p-4 text-center">
+        {% if teacher.photo %}
+          <img src="{{ teacher.photo.url }}" class="rounded-circle mb-3" width="110" height="110" style="object-fit:cover;">
+        {% else %}
+          <i class="bi bi-person-circle fs-1 text-secondary mb-2"></i>
+        {% endif %}
+        <h5 class="mb-0">{{ teacher.user.get_full_name|default:teacher.user.username }}</h5>
+        <p class="text-muted small mb-2">{{ teacher.teacher_id }}</p>
+        <span class="badge badge-status-{{ teacher.status|lower }}">{{ teacher.get_status_display }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Details</h6>
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Department</dt><dd class="col-sm-8">{{ teacher.department|default:"—" }}</dd>
+          <dt class="col-sm-4">Qualification</dt><dd class="col-sm-8">{{ teacher.qualification|default:"—" }}</dd>
+          <dt class="col-sm-4">Joining Date</dt><dd class="col-sm-8">{{ teacher.joining_date|default:"—" }}</dd>
+          <dt class="col-sm-4">Email</dt><dd class="col-sm-8">{{ teacher.user.email|default:"—" }}</dd>
+          <dt class="col-sm-4">Phone</dt><dd class="col-sm-8">{{ teacher.user.phone|default:"—" }}</dd>
+          <dt class="col-sm-4">Subjects</dt>
+          <dd class="col-sm-8">
+            {% for s in teacher.subjects_taught.all %}<span class="badge text-bg-light border">{{ s.code }}</span>{% empty %}—{% endfor %}
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Transport{% endblock %}
+{% block page_title %}Transport Management{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="text-muted mb-0">Manage bus routes and student assignments</p>
+  <div class="d-flex gap-2">
+    <a href="{% url 'transport:assign' %}" class="btn btn-outline-primary"><i class="bi bi-person-plus-fill me-1"></i>Assign Student</a>
+    <a href="{% url 'transport:route_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Route</a>
+  </div>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Route</th><th>Vehicle No.</th><th>Driver</th><th>Phone</th><th>Capacity</th><th>Assigned Students</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for r in routes %}
+        <tr>
+          <td class="fw-semibold">{{ r.name }}</td>
+          <td>{{ r.vehicle_number }}</td>
+          <td>{{ r.driver_name|default:"—" }}</td>
+          <td>{{ r.driver_phone|default:"—" }}</td>
+          <td>{{ r.capacity }}</td>
+          <td>{{ r.students.count }}</td>
+          <td class="text-end">
+            <a href="{% url 'transport:route_edit' r.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+            <a href="{% url 'transport:route_delete' r.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No routes yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Send Notification{% endblock %}
+{% block page_title %}Send Notification{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Student</label>
+            <select name="student" class="form-select" required>
+              {% for s in students %}
+                <option value="{{ s.id }}">{{ s.student_id }} - {{ s.user.get_full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Channel</label>
+            <select name="channel" class="form-select">
+              <option value="WHATSAPP">WhatsApp</option>
+              <option value="EMAIL">Email</option>
+              <option value="SMS">SMS</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Subject (email only)</label>
+            <input type="text" name="subject" class="form-control" value="Notice">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea name="message" class="form-control" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

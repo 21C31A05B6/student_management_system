@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load sms_extras %}
+{% block title %}Timetable{% endblock %}
+{% block page_title %}Timetable{% endblock %}
+{% block content %}
+{% if user.role == 'ADMIN' %}
+<div class="card mb-4">
+  <div class="card-body p-4">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Section</label>
+        <select name="section" class="form-select" onchange="this.form.submit()">
+          <option value="">Select a section</option>
+          {% for s in sections %}
+            <option value="{{ s.id }}" {% if selected_section == s.id|stringformat:'s' %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <a href="{% url 'timetable:manage' %}" class="btn btn-outline-primary"><i class="bi bi-gear-fill me-1"></i>Manage Timetable Entries</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mt-2">
+  {% for day_num, day_name in days %}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body p-3">
+        <h6 class="mb-3">{{ day_name }}</h6>
+        {% for entry in grid|get_item:day_num %}
+          <div class="border rounded p-2 mb-2">
+            <div class="fw-semibold">{{ entry.subject.code }}</div>
+            <div class="small text-muted">{{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}</div>
+            {% if entry.teacher %}<div class="small text-muted">{{ entry.teacher.user.get_full_name }}</div>{% endif %}
+            {% if user.role == 'ADMIN' %}<div class="small">{{ entry.section }}</div>{% endif %}
+          </div>
+        {% empty %}
+          <p class="text-muted small mb-0">No classes.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

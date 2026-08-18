@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Issued Books{% endblock %}
+{% block page_title %}Issued Books{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <a href="{% url 'library:book_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back to Catalog</a>
+  <a href="{% url 'library:issue_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Issue Book</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Book</th><th>Student</th><th>Issued</th><th>Due</th><th>Issued By</th><th>Status</th><th>Fine</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for i in issues %}
+        <tr>
+          <td>{{ i.book.title }}</td>
+          <td>{{ i.student.student_id }} - {{ i.student.user.get_full_name }}</td>
+          <td>{{ i.issue_date }}</td>
+          <td>{{ i.due_date }}</td>
+          <td>{{ i.issued_by.user.get_full_name|default:"—" }}</td>
+          <td>
+            {% if i.return_date %}
+              <span class="badge badge-status-active">Returned {{ i.return_date }}</span>
+            {% elif i.is_overdue %}
+              <span class="badge badge-status-inactive">Overdue ({{ i.days_late }}d)</span>
+            {% else %}
+              <span class="badge badge-status-partial">Issued</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if i.fine_amount > 0 %}
+              <span class="{% if i.fine_paid %}text-muted text-decoration-line-through{% else %}text-danger fw-semibold{% endif %}">₹{{ i.fine_amount }}</span>
+              {% if not i.fine_paid %}
+              <form method="post" action="{% url 'library:fine_paid' i.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link btn-sm p-0 ms-1 small">mark paid</button>
+              </form>
+              {% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-end">
+            {% if not i.return_date %}
+            <form method="post" action="{% url 'library:issue_return' i.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-primary">Mark Returned</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No books issued yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

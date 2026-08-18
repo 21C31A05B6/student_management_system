@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Courses{% endblock %}
+{% block page_title %}Course / Class Management{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="text-muted mb-0">Manage courses offered under each department</p>
+  <a href="{% url 'academics:course_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Course</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Course</th><th>Department</th><th>Duration</th><th>Sections</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for course in courses %}
+        <tr>
+          <td class="fw-semibold">{{ course.name }}</td>
+          <td>{{ course.department.code }}</td>
+          <td>{{ course.duration_years }} years</td>
+          <td>{{ course.sections.count }}</td>
+          <td class="text-end">
+            <a href="{% url 'academics:course_edit' course.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+            <a href="{% url 'academics:course_delete' course.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-4">No courses yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mt-5 mb-3">
+  <h6 class="mb-0">Sections</h6>
+  <a href="{% url 'academics:section_add' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Add Section</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Course</th><th>Year</th><th>Semester</th><th>Section</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for course in courses %}
+          {% for section in course.sections.all %}
+          <tr>
+            <td>{{ section.course.name }}</td>
+            <td>{{ section.year }}</td>
+            <td>{{ section.semester }}</td>
+            <td>{{ section.name }}</td>
+            <td class="text-end">
+              <a href="{% url 'academics:section_edit' section.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'academics:section_delete' section.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+            </td>
+          </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

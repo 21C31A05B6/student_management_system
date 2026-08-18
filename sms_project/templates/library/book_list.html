@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Library{% endblock %}
+{% block page_title %}Library Management{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <p class="text-muted mb-0">Book catalog{% if user.role == 'TEACHER' %} (view only — ask admin to edit){% endif %}</p>
+  <div class="d-flex gap-2">
+    <a href="{% url 'library:issue_list' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left-right me-1"></i>Issued Books</a>
+    {% if user.role == 'ADMIN' %}
+    <a href="{% url 'library:book_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Book</a>
+    {% endif %}
+  </div>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Quantity</th><th>Available</th>{% if user.role == 'ADMIN' %}<th class="text-end">Actions</th>{% endif %}</tr></thead>
+      <tbody>
+        {% for b in books %}
+        <tr>
+          <td class="fw-semibold">{{ b.title }}</td>
+          <td>{{ b.author }}</td>
+          <td>{{ b.isbn|default:"—" }}</td>
+          <td>{{ b.quantity }}</td>
+          <td>
+            {% if b.available_copies > 0 %}
+              <span class="badge badge-status-active">{{ b.available_copies }} available</span>
+            {% else %}
+              <span class="badge badge-status-inactive">All issued</span>
+            {% endif %}
+          </td>
+          {% if user.role == 'ADMIN' %}
+          <td class="text-end">
+            <a href="{% url 'library:book_edit' b.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+            <a href="{% url 'library:book_delete' b.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No books in catalog yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

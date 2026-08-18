@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}My Attendance{% endblock %}
+{% block page_title %}My Attendance & Attendance QR Badge{% endblock %}
+{% block content %}
+
+{% if student %}
+<div class="card mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #1e265c 0%, #2d3a8c 100%); color: #fff;">
+  <div class="card-body p-4">
+    <div class="row align-items-center g-4">
+      <div class="col-md-8">
+        <span class="badge bg-light text-dark mb-2"><i class="bi bi-person-badge me-1"></i>Digital Student ID</span>
+        <h4 class="mb-1 text-white">{{ student.user.get_full_name|default:student.user.username }}</h4>
+        <p class="text-light opacity-75 mb-2">Student ID: <strong>{{ student.student_id }}</strong> | {{ student.course.name }} {% if student.section %}({{ student.section.name }}){% endif %}</p>
+        <p class="small text-light opacity-75 mb-0">Show this personal QR Code to your teacher or scanner in class to instantly mark your attendance.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="p-2 bg-white rounded shadow-sm d-inline-block">
+          <img src="{% url 'reports:student_qr' student.pk %}" width="120" height="120" class="img-fluid" alt="My Attendance QR Code">
+        </div>
+        <div class="mt-1">
+          <a href="{% url 'reports:student_qr' student.pk %}" download="attendance_qr.png" class="btn btn-sm btn-outline-light mt-1">
+            <i class="bi bi-download me-1"></i>Save QR
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+  {% for s in summary %}
+  <div class="col-md-4 col-lg-3">
+    <div class="card stat-card shadow-sm h-100">
+      <div class="card-body">
+        <p class="text-muted small mb-1">{{ s.subject.code }}</p>
+        <h4 class="mb-0 text-primary">{{ s.pct }}%</h4>
+        <p class="text-muted small mb-0">{{ s.present }}/{{ s.total }} classes</p>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="alert alert-info">No attendance records yet.</div></div>
+  {% endfor %}
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-4">
+    <h6 class="mb-3 fw-bold"><i class="bi bi-calendar3 text-primary me-2"></i>Attendance Log</h6>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>Date</th><th>Subject</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for r in records %}
+          <tr>
+            <td>{{ r.date }}</td>
+            <td>{{ r.subject.code }} - {{ r.subject.name }}</td>
+            <td><span class="badge badge-status-{{ r.status|lower }}">{{ r.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-muted py-4">No attendance records found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

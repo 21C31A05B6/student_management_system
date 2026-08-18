@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load sms_extras %}
+{% block title %}My Assignments{% endblock %}
+{% block page_title %}My Assignments{% endblock %}
+{% block content %}
+<div class="row g-3">
+  {% for a in assignments %}
+  {% with sub=my_subs|get_item:a.id %}
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h6 class="mb-0">{{ a.title }}</h6>
+          <span class="badge {% if sub %}badge-status-active{% else %}badge-status-inactive{% endif %}">
+            {% if sub %}Submitted{% else %}Pending{% endif %}
+          </span>
+        </div>
+        <p class="small text-muted mb-1">{{ a.subject.code }} &middot; Due {{ a.due_date }}</p>
+        <p class="small mb-3">{{ a.description|default:"" }}</p>
+        {% if a.attachment %}<a href="{{ a.attachment.url }}" class="d-block small mb-2" target="_blank"><i class="bi bi-paperclip"></i> Assignment file</a>{% endif %}
+        {% if sub and sub.grade %}<p class="small mb-2"><strong>Grade:</strong> {{ sub.grade }} — {{ sub.feedback }}</p>{% endif %}
+        <a href="{% url 'assignments:submit' a.pk %}" class="btn btn-sm btn-outline-primary">
+          {% if sub %}Update Submission{% else %}Submit{% endif %}
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+  {% empty %}
+  <div class="col-12"><div class="alert alert-info">No assignments yet.</div></div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+# =============================================================================
+#  render.yaml — Infrastructure-as-Code for Render
+#  Defines the web service + PostgreSQL database in one file.
+#  Commit this file to your repo root; Render detects it automatically.
+# =============================================================================
+
+databases:
+  - name: sms-db
+    databaseName: sms_db
+    user: sms_user
+    plan: free           # Change to "starter" or higher for production
+
+services:
+  - type: web
+    name: student-management-system
+    runtime: python
+    plan: free           # Change to "starter" or higher for production
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn sms_project.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
+    rootDir: .           # build.sh and manage.py live in the same directory
+
+    # Environment variables set on Render dashboard or here (non-secret ones)
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: sms_project.settings
+
+      - key: DJANGO_DEBUG
+        value: "False"
+
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "student-management-system.onrender.com"
+
+      # SSL / Security headers
+      - key: DJANGO_SECURE_SSL_REDIRECT
+        value: "True"
+      - key: DJANGO_SESSION_COOKIE_SECURE
+        value: "True"
+      - key: DJANGO_CSRF_COOKIE_SECURE
+        value: "True"
+      - key: DJANGO_SECURE_HSTS_SECONDS
+        value: "31536000"
+
+      # Automatically link the managed PostgreSQL database above
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sms-db
+          property: connectionString
+
+      # Secret values — set these in the Render dashboard (Environment tab)
+      # Do NOT put real values here; use Render's "Secret Files" or dashboard env UI.
+      - key: DJANGO_SECRET_KEY
+        sync: false      # Render will prompt you to fill this in the dashboard

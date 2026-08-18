@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#2d3a8c;"><i class="bi bi-people-fill"></i></div>
+        <div><p class="text-muted small mb-0">Students</p><h4 class="mb-0">{{ total_students }}</h4></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#1f9d55;"><i class="bi bi-person-workspace"></i></div>
+        <div><p class="text-muted small mb-0">Teachers</p><h4 class="mb-0">{{ total_teachers }}</h4></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#f5a623;"><i class="bi bi-journal-bookmark-fill"></i></div>
+        <div><p class="text-muted small mb-0">Courses</p><h4 class="mb-0">{{ total_courses }}</h4></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#8952e0;"><i class="bi bi-diagram-3-fill"></i></div>
+        <div><p class="text-muted small mb-0">Departments</p><h4 class="mb-0">{{ total_departments }}</h4></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#e5484d;"><i class="bi bi-book-fill"></i></div>
+        <div><p class="text-muted small mb-0">Subjects</p><h4 class="mb-0">{{ total_subjects }}</h4></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#0d9488;"><i class="bi bi-calendar-check-fill"></i></div>
+        <div><p class="text-muted small mb-0">Overall Attendance</p><h4 class="mb-0">{{ attendance_pct }}%</h4></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Students by Department</h6>
+        <canvas id="deptChart" height="180"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Attendance Trend (last 7 days)</h6>
+        <canvas id="attendanceChart" height="180"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-1">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Recent Students</h6>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>ID</th><th>Name</th><th>Course</th></tr></thead>
+            <tbody>
+              {% for s in recent_students %}
+              <tr><td>{{ s.student_id }}</td><td><a href="{% url 'students:detail' s.pk %}">{{ s.user.get_full_name|default:s.user.username }}</a></td><td>{{ s.course.name|default:"—" }}</td></tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted py-3">No students yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Recent Fee Records</h6>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Student</th><th>Year</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for f in recent_payments %}
+              <tr><td><a href="{% url 'fees:detail' f.pk %}">{{ f.student.student_id }}</a></td><td>{{ f.academic_year }}</td><td><span class="badge badge-status-{{ f.status|lower }}">{{ f.get_status_display }}</span></td></tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted py-3">No fee records yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const glassTextColor = 'rgba(245, 243, 255, 0.85)';
+const glassGrid = 'rgba(255, 255, 255, 0.08)';
+Chart.defaults.color = glassTextColor;
+
+new Chart(document.getElementById('deptChart'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ dept_labels|safe }},
+    datasets: [{
+      data: {{ dept_counts|safe }},
+      backgroundColor: ['#6c5ce7', '#00cec9', '#fd79a8', '#fdcb6e', '#0984e3', '#55efc4'],
+      borderWidth: 0,
+    }]
+  },
+  options: { plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('attendanceChart'), {
+  type: 'line',
+  data: {
+    labels: {{ attendance_trend_labels|safe }},
+    datasets: [{
+      label: 'Attendance %',
+      data: {{ attendance_trend_data|safe }},
+      borderColor: '#00cec9',
+      backgroundColor: 'rgba(0, 206, 201, 0.2)',
+      tension: 0.35,
+      fill: true,
+    }]
+  },
+  options: {
+    scales: {
+      x: { grid: { color: glassGrid } },
+      y: { grid: { color: glassGrid }, min: 0, max: 100 }
+    },
+    plugins: { legend: { display: false } }
+  }
+});
+</script>
+{% endblock %}

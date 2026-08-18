@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}My Children{% endblock %}
+{% block page_title %}My Children{% endblock %}
+{% block content %}
+<div class="row g-4">
+  {% for child in children %}
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h5 class="mb-0">{{ child.user.get_full_name }}</h5>
+            <p class="text-muted small mb-0">{{ child.student_id }} &middot; {{ child.course }}</p>
+          </div>
+          <span class="badge badge-status-{{ child.status|lower }}">{{ child.get_status_display }}</span>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-4">
+            <div class="border rounded p-2 text-center">
+              <p class="small text-muted mb-0">Attendance</p>
+              <p class="fw-semibold mb-0">
+                {% with total=child.attendance_records.count present=child.attendance_records.all|length %}
+                  {{ total }} recs
+                {% endwith %}
+              </p>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="border rounded p-2 text-center">
+              <p class="small text-muted mb-0">Marks</p>
+              <p class="fw-semibold mb-0">{{ child.marks.count }} entries</p>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="border rounded p-2 text-center">
+              <p class="small text-muted mb-0">Fee Records</p>
+              <p class="fw-semibold mb-0">{{ child.fee_records.count }}</p>
+            </div>
+          </div>
+        </div>
+        <a href="{% url 'students:detail' child.pk %}" class="btn btn-sm btn-outline-primary">View Full Profile</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="alert alert-info">No children linked to your account yet. Contact the school admin.</div></div>
+  {% endfor %}
+</div>
+{% endblock %}

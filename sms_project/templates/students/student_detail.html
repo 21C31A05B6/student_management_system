@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}{{ student.user.get_full_name }}{% endblock %}
+{% block page_title %}Student Profile{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-body p-4 text-center">
+        {% if student.photo %}
+          <img src="{{ student.photo.url }}" class="rounded-circle mb-3" width="110" height="110" style="object-fit:cover;">
+        {% else %}
+          <i class="bi bi-person-circle fs-1 text-secondary mb-2"></i>
+        {% endif %}
+        <h5 class="mb-0">{{ student.user.get_full_name|default:student.user.username }}</h5>
+        <p class="text-muted small mb-2">{{ student.student_id }}</p>
+        <span class="badge badge-status-{{ student.status|lower }}">{{ student.get_status_display }}</span>
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Quick Stats</h6>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Attendance</span>
+          <span class="fw-semibold">{% if attendance_pct is not None %}{{ attendance_pct }}%{% else %}—{% endif %}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-muted">Classes ({{ present_classes }}/{{ total_classes }})</span>
+        </div>
+        <div class="d-flex justify-content-between mt-2">
+          <span class="text-muted">CGPA</span>
+          <span class="fw-semibold">{% if cgpa is not None %}{{ cgpa }}{% else %}—{% endif %}</span>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Documents</h6>
+        <div class="d-flex flex-column gap-2">
+          <a href="{% url 'reports:id_card' student.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-credit-card-2-front me-1"></i>Download ID Card (PDF)</a>
+          {% for m in marks %}{% endfor %}
+          {% if exams_for_reports %}
+            {% for e in exams_for_reports %}
+              <a href="{% url 'reports:report_card' student.pk e.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-earmark-pdf me-1"></i>Report Card — {{ e.name }}</a>
+            {% endfor %}
+          {% endif %}
+        </div>
+        <hr>
+        <p class="small text-muted mb-1">Attendance QR Code</p>
+        <img src="{% url 'reports:student_qr' student.pk %}" class="qr-box" width="110" height="110" alt="QR code">
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Personal & Academic Details</h6>
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Date of Birth</dt><dd class="col-sm-8">{{ student.date_of_birth|default:"—" }}</dd>
+          <dt class="col-sm-4">Gender</dt><dd class="col-sm-8">{{ student.get_gender_display|default:"—" }}</dd>
+          <dt class="col-sm-4">Department</dt><dd class="col-sm-8">{{ student.department|default:"—" }}</dd>
+          <dt class="col-sm-4">Course</dt><dd class="col-sm-8">{{ student.course|default:"—" }}</dd>
+          <dt class="col-sm-4">Year / Semester</dt><dd class="col-sm-8">Y{{ student.year }} / S{{ student.semester }}</dd>
+          <dt class="col-sm-4">Section</dt><dd class="col-sm-8">{{ student.section|default:"—" }}</dd>
+          <dt class="col-sm-4">Address</dt><dd class="col-sm-8">{{ student.address|default:"—" }}</dd>
+          <dt class="col-sm-4">Parent/Guardian</dt><dd class="col-sm-8">{{ student.parent_name|default:"—" }} {% if student.parent_phone %}({{ student.parent_phone }}){% endif %}</dd>
+          <dt class="col-sm-4">Admission Date</dt><dd class="col-sm-8">{{ student.admission_date|default:"—" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Marks</h6>        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Subject</th><th>Exam</th><th>Marks</th><th>%</th><th>Grade</th></tr></thead>
+            <tbody>
+              {% for m in marks %}
+              <tr><td>{{ m.subject.code }}</td><td>{{ m.exam.name }}</td><td>{{ m.marks_obtained }}/{{ m.max_marks }}</td><td>{{ m.percentage }}%</td><td>{{ m.grade }}</td></tr>
+              {% empty %}
+              <tr><td colspan="5" class="text-center text-muted py-3">No marks recorded yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="mb-3">Fee Status</h6>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Academic Year</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for f in fees %}
+              <tr>
+                <td>{{ f.academic_year }}</td><td>₹{{ f.total_amount }}</td><td>₹{{ f.paid_amount }}</td><td>₹{{ f.due_amount }}</td>
+                <td><span class="badge badge-status-{{ f.status|lower }}">{{ f.get_status_display }}</span></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="text-center text-muted py-3">No fee records yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

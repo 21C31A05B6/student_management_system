@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Departments{% endblock %}
+{% block page_title %}Department Management{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="text-muted mb-0">Manage academic departments</p>
+  <a href="{% url 'academics:department_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Department</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr><th>Code</th><th>Name</th><th>Head of Department</th><th>Courses</th><th>Subjects</th><th class="text-end">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for dept in departments %}
+        <tr>
+          <td class="fw-semibold">{{ dept.code }}</td>
+          <td>{{ dept.name }}</td>
+          <td>{{ dept.head_of_department|default:"—" }}</td>
+          <td>{{ dept.courses.count }}</td>
+          <td>{{ dept.subjects.count }}</td>
+          <td class="text-end">
+            <a href="{% url 'academics:department_edit' dept.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+            <a href="{% url 'academics:department_delete' dept.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No departments yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

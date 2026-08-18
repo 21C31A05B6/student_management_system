@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+{% block page_title %}Notifications (Email / SMS){% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="text-muted mb-0">Every email/SMS sent by the system is logged here.</p>
+  <a href="{% url 'notifications:send' %}" class="btn btn-primary"><i class="bi bi-send-fill me-1"></i>Send Notification</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>To</th><th>Channel</th><th>Subject</th><th>Message</th><th>Status</th><th>Sent</th></tr></thead>
+      <tbody>
+        {% for n in notifications %}
+        <tr>
+          <td>{{ n.recipient_user.get_full_name|default:n.recipient_user }}</td>
+          <td>
+            {% if n.channel == 'WHATSAPP' %}
+              <span class="badge bg-success text-white"><i class="bi bi-whatsapp me-1"></i>WhatsApp</span>
+            {% elif n.channel == 'EMAIL' %}
+              <span class="badge bg-primary text-white"><i class="bi bi-envelope-fill me-1"></i>Email</span>
+            {% else %}
+              <span class="badge bg-info text-white"><i class="bi bi-chat-dots-fill me-1"></i>SMS</span>
+            {% endif %}
+          </td>
+          <td>{{ n.subject|default:"—" }}</td>
+          <td class="text-truncate" style="max-width:280px;">{{ n.message }}</td>
+          <td><span class="badge {% if n.status == 'SENT' %}badge-status-active{% else %}badge-status-inactive{% endif %}">{{ n.get_status_display }}</span></td>
+          <td>{{ n.created_at|date:"d M, H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No notifications sent yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
