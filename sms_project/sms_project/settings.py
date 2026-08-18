@@ -126,10 +126,10 @@ import dj_database_url
 database_url = os.environ.get('DATABASE_URL')
 if database_url:
     DATABASES = {
-        'default': dj_database_url.parse(
-            database_url,
+        'default': dj_database_url.config(
+            default=database_url,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=False if 'localhost' in database_url or '127.0.0.1' in database_url else True,
         )
     }
 elif os.environ.get('DJANGO_DB_ENGINE') == 'postgres':
