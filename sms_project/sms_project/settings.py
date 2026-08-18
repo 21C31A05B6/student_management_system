@@ -13,7 +13,20 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = os.environ.get(
+    'DJANGO_ALLOWED_HOSTS',
+    '127.0.0.1,localhost,student-management-system-n48c.onrender.com,.onrender.com'
+).split(',')
+
+# CSRF: trust the Render domain and localhost (Django 4+ requires this for HTTPS origins)
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'DJANGO_CSRF_TRUSTED_ORIGINS',
+    'https://student-management-system-n48c.onrender.com,https://*.onrender.com,http://127.0.0.1:8000,http://localhost:8000'
+).split(',')
+
+# SameSite cookie policy — 'Lax' is the safest cross-browser default
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'False') == 'True'
@@ -27,6 +40,7 @@ if not DEBUG:
 
     if not SECRET_KEY or SECRET_KEY.startswith('django-insecure-'):
         raise RuntimeError('Set a secure DJANGO_SECRET_KEY before running with DEBUG=False.')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',

@@ -1,6 +1,7 @@
 # =============================================================================
 #  render.yaml — Infrastructure-as-Code for Render
 #  Defines the web service + PostgreSQL database in one file.
+#  Placed at repo root so Render Blueprints automatically detects it.
 # =============================================================================
 
 databases:
@@ -16,7 +17,7 @@ services:
     plan: free           # Change to "starter" or higher for production
     buildCommand: "./build.sh"
     startCommand: "gunicorn sms_project.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
-    rootDir: sms_project
+    rootDir: sms_project  # Django project directory containing manage.py & build.sh
 
     envVars:
       - key: DJANGO_SETTINGS_MODULE
