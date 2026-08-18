@@ -14,6 +14,9 @@ class User(AbstractUser):
 
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.STUDENT)
     phone = models.CharField(max_length=20, blank=True)
+    # Tracks the single active session key.
+    # On new login, the previous session is deleted → old device is logged out automatically.
+    active_session_key = models.CharField(max_length=40, blank=True, null=True)
 
     def is_admin(self):
         return self.role == self.Role.ADMIN

@@ -7,7 +7,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', RedirectView.as_view(pattern_name='dashboard:home', permanent=False)),
+    path('', RedirectView.as_view(pattern_name='accounts:login', permanent=False)),
     path('accounts/', include('accounts.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('students/', include('students.urls')),

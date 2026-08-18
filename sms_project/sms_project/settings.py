@@ -68,11 +68,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Serve static files in production
+    # WhiteNoise serves static files in production (not needed in local dev)
+    *(['whitenoise.middleware.WhiteNoiseMiddleware'] if not DEBUG else []),
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'accounts.middleware.SingleDeviceMiddleware',  # One active session per user
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'auditlog.middleware.AuditLogMiddleware',
@@ -163,6 +165,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'dashboard:home'
 LOGOUT_REDIRECT_URL = 'accounts:login'
+
+# ---------------------------------------------------------------------------
+# Session Security
+# Session expires when the browser is closed (no persistent cookie).
+# Also hard-cap at 8 hours in case the browser stays open all day.
+# ---------------------------------------------------------------------------
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True   # logout when browser/tab is closed
+SESSION_COOKIE_AGE = 8 * 60 * 60        # 8 hours max even if browser stays open
+SESSION_SAVE_EVERY_REQUEST = True        # refresh the 8-hour timer on each request
+SESSION_COOKIE_HTTPONLY = True           # JS cannot read the session cookie
+
 
 # ---------------------------------------------------------------------------
 # Email (Module: Email Notifications)
