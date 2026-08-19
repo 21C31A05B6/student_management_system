@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bgGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#4c1d95"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="accentGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6c5ce7"/>
+      <stop offset="100%" stop-color="#00cec9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="192" height="192" rx="42" fill="url(#bgGrad192)"/>
+  <rect x="8" y="8" width="176" height="176" rx="34" fill="none" stroke="url(#accentGrad192)" stroke-width="2" opacity="0.6"/>
+
+  <!-- Glowing Mortarboard Icon -->
+  <g transform="translate(0, -6)">
+    <!-- Cap top -->
+    <polygon points="96,44 158,72 96,100 34,72" fill="url(#accentGrad192)"/>
+    <!-- Cap base -->
+    <path d="M62,86 L62,114 C62,128 77,140 96,140 C115,140 130,128 130,114 L130,86 L96,102 Z" fill="#ffffff" opacity="0.95"/>
+    <!-- Tassel -->
+    <path d="M142,76 L142,118 C142,122 138,128 136,130" stroke="#00cec9" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <circle cx="142" cy="76" r="3" fill="#ffffff"/>
+  </g>
+
+  <!-- Text -->
+  <text x="96" y="168" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="900" letter-spacing="2" fill="#ffffff" text-anchor="middle">SMS</text>
+</svg>
