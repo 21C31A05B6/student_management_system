@@ -10,11 +10,15 @@ from .forms import AnnouncementForm
 
 @login_required
 def announcement_list(request):
-    qs = Announcement.objects.all()
-    if request.user.role == 'TEACHER':
-        qs = qs.filter(audience__in=[Announcement.Audience.ALL, Announcement.Audience.TEACHERS])
-    elif request.user.role == 'STUDENT':
-        qs = qs.filter(audience__in=[Announcement.Audience.ALL, Announcement.Audience.STUDENTS])
+    role = getattr(request.user, 'role', None)
+    if role == 'ADMIN':
+        qs = Announcement.objects.all()
+    elif role == 'TEACHER':
+        qs = Announcement.objects.filter(audience__in=[Announcement.Audience.ALL, Announcement.Audience.TEACHERS])
+    elif role in ('STUDENT', 'PARENT'):
+        qs = Announcement.objects.filter(audience__in=[Announcement.Audience.ALL, Announcement.Audience.STUDENTS])
+    else:
+        qs = Announcement.objects.none()
     return render(request, 'announcements/list.html', {'announcements': qs})
 
 

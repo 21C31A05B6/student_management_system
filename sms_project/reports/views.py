@@ -8,21 +8,29 @@ from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle
 
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from accounts.decorators import teacher_required
 from students.models import Student
 from exams.models import Mark, Exam, calculate_gpa
 
 
 def _can_view(request, student):
-    """Admin/teacher can view any student; a student can only view their own."""
+    """Admin/teacher can view any student; a student can only view their own; a parent can view their children."""
     user = request.user
-    if user.role in ('ADMIN', 'TEACHER'):
+    if not user.is_authenticated:
+        return False
+    role = getattr(user, 'role', None)
+    if role in ('ADMIN', 'TEACHER'):
         return True
-    if user.role == 'STUDENT' and hasattr(user, 'student_profile') and user.student_profile.id == student.id:
+    if role == 'STUDENT' and hasattr(user, 'student_profile') and user.student_profile.id == student.id:
+        return True
+    if role == 'PARENT' and hasattr(user, 'parent_profile') and user.parent_profile.children.filter(id=student.id).exists():
         return True
     return False
 
 
+@login_required
 def report_card_pdf(request, pk, exam_id):
     student = get_object_or_404(Student, pk=pk)
     exam = get_object_or_404(Exam, pk=exam_id)
@@ -92,6 +100,7 @@ def report_card_pdf(request, pk, exam_id):
     return FileResponse(buf, as_attachment=True, filename=f"report_card_{student.student_id}_{exam.name}.pdf")
 
 
+@login_required
 def id_card_pdf(request, pk):
     student = get_object_or_404(Student, pk=pk)
     if not _can_view(request, student):
@@ -132,6 +141,7 @@ from django.shortcuts import get_object_or_404, render
 from academics.models import Subject, Section
 
 
+@login_required
 def student_qr_png(request, pk):
     """Generates a QR code PNG encoding the student's unique attendance token
     (Module: QR-code attendance). Teachers scan this to mark attendance instantly."""
@@ -145,9 +155,17 @@ def student_qr_png(request, pk):
     return HttpResponse(buf.getvalue(), content_type='image/png')
 
 
+@login_required
 def session_qr_png(request, subject_id, date_str):
     """Generates a QR code PNG for a live class attendance session."""
     subject = get_object_or_404(Subject, pk=subject_id)
+    user = request.user
+    if user.role == 'TEACHER':
+        if not subject.teachers.filter(user=user).exists():
+            raise PermissionDenied('You are not assigned to this subject.')
+    elif user.role != 'ADMIN':
+        raise PermissionDenied('Only teachers and admins may generate session QR codes.')
+
     qr_data = f"SMS_SESSION:{subject.id}:{date_str}"
     img = qrcode.make(qr_data)
     buf = io.BytesIO()
