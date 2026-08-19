@@ -13,16 +13,25 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get(
+raw_allowed_hosts = os.environ.get(
     'DJANGO_ALLOWED_HOSTS',
-    '127.0.0.1,localhost,student-management-system-n48c.onrender.com,.onrender.com'
-).split(',')
+    '127.0.0.1,localhost,student-management-system-iyku.onrender.com,student-management-system-n48c.onrender.com,.onrender.com'
+)
+# Strip any protocol (http:// or https://) or paths if mistakenly provided in env var
+ALLOWED_HOSTS = [
+    h.strip().replace('https://', '').replace('http://', '').split('/')[0]
+    for h in raw_allowed_hosts.split(',') if h.strip()
+]
 
-# CSRF: trust the Render domain and localhost (Django 4+ requires this for HTTPS origins)
-CSRF_TRUSTED_ORIGINS = os.environ.get(
+# CSRF: trust Render domains and localhost (Django 4+ requires full origin https://...)
+raw_csrf_origins = os.environ.get(
     'DJANGO_CSRF_TRUSTED_ORIGINS',
-    'https://student-management-system-n48c.onrender.com,https://*.onrender.com,http://127.0.0.1:8000,http://localhost:8000'
-).split(',')
+    'https://student-management-system-iyku.onrender.com,https://student-management-system-n48c.onrender.com,https://*.onrender.com,http://127.0.0.1:8000,http://localhost:8000'
+)
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() if o.strip().startswith(('http://', 'https://')) else f"https://{o.strip()}"
+    for o in raw_csrf_origins.split(',') if o.strip()
+]
 
 # SameSite cookie policy — 'Lax' is the safest cross-browser default
 CSRF_COOKIE_SAMESITE = 'Lax'
