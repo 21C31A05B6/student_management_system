@@ -3,7 +3,7 @@
  * Handles offline caching, fast asset loading, and network resilience.
  */
 
-const CACHE_NAME = 'sms-pwa-v1';
+const CACHE_NAME = 'sms-pwa-v2';
 const STATIC_ASSETS = [
   '/',
   '/accounts/login/',
