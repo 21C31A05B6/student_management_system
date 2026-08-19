@@ -85,6 +85,13 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             return qs.filter(subject__teachers=user.teacher_profile)
         return qs.none()
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role == 'TEACHER' and hasattr(user, 'teacher_profile'):
+            serializer.save(teacher=user.teacher_profile)
+        else:
+            serializer.save()
+
 
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()

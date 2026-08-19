@@ -53,9 +53,7 @@ class IsAdminOrReadOnly(BasePermission):
 
 
 class IsAdminOrTeacherWriteReadOnlyOthers(BasePermission):
-    """Admin: full write. Teacher: POST/PATCH only (no PUT, no DELETE — a
-    teacher can add/update attendance or marks but never bulk-replace or
-    delete records). Student/Parent: read-only."""
+    """Admin: full write. Teacher: POST/PATCH only for assigned subjects. Student/Parent: read-only."""
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
@@ -66,4 +64,19 @@ class IsAdminOrTeacherWriteReadOnlyOthers(BasePermission):
             return True
         if role == 'TEACHER':
             return request.method in ('POST', 'PATCH')
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        if not request.user.is_authenticated:
+            return False
+        if request.user.role == 'ADMIN':
+            return True
+        if request.user.role == 'TEACHER':
+            if hasattr(obj, 'subject'):
+                return obj.subject.teachers.filter(user=request.user).exists()
+            if hasattr(obj, 'exam_subject'):
+                return obj.exam_subject.subject.teachers.filter(user=request.user).exists()
+            return False
         return False

@@ -48,6 +48,16 @@ class AttendanceRecordSerializer(serializers.ModelSerializer):
         model = AttendanceRecord
         fields = ['id', 'student', 'subject', 'teacher', 'date', 'status']
 
+    def validate(self, attrs):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated and request.user.role == 'TEACHER':
+            subject = attrs.get('subject', getattr(self.instance, 'subject', None))
+            if subject and not subject.teachers.filter(user=request.user).exists():
+                raise serializers.ValidationError({'subject': 'You are not assigned to teach this subject.'})
+            if hasattr(request.user, 'teacher_profile'):
+                attrs['teacher'] = request.user.teacher_profile
+        return attrs
+
 
 class ExamSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,16 +83,12 @@ class MarkSerializer(serializers.ModelSerializer):
         fields = ['id', 'student', 'exam_subject', 'subject', 'exam', 'max_marks', 'marks_obtained', 'percentage', 'grade']
 
     def validate(self, attrs):
-        # Only re-run the marks-range check (0 <= marks_obtained <= max_marks)
-        # here — NOT a full model.full_clean(), which would also re-run
-        # validate_unique() on a freshly-constructed (unsaved) Mark object.
-        # Django's uniqueness check only excludes "self" when the instance
-        # was fetched from the DB (_state.adding == False); a bare
-        # Mark(pk=..., ...) constructor call is always "adding", so it would
-        # incorrectly flag the very row being updated as a duplicate.
-        # DRF's own auto-generated UniqueTogetherValidator already handles
-        # the (student, exam_subject) uniqueness correctly for updates.
+        request = self.context.get('request')
         exam_subject = attrs.get('exam_subject', getattr(self.instance, 'exam_subject', None))
+        if request and request.user.is_authenticated and request.user.role == 'TEACHER':
+            if exam_subject and not exam_subject.subject.teachers.filter(user=request.user).exists():
+                raise serializers.ValidationError({'exam_subject': 'You are not assigned to teach this subject.'})
+
         marks_obtained = attrs.get('marks_obtained', getattr(self.instance, 'marks_obtained', None))
         if marks_obtained is not None:
             if marks_obtained < 0:
@@ -95,9 +101,11 @@ class MarkSerializer(serializers.ModelSerializer):
 
 
 class FeeRecordSerializer(serializers.ModelSerializer):
+    paid_amount = serializers.ReadOnlyField()
     due_amount = serializers.ReadOnlyField()
     status = serializers.ReadOnlyField()
 
     class Meta:
         model = FeeRecord
         fields = ['id', 'student', 'academic_year', 'total_amount', 'paid_amount', 'due_amount', 'status']
+        read_only_fields = ['paid_amount', 'due_amount', 'status']

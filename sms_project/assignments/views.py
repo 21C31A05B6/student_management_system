@@ -55,7 +55,7 @@ def assignment_submissions(request, pk):
         raise PermissionDenied('You are not allowed to view submissions for this assignment.')
     submissions = assignment.submissions.select_related('student', 'student__user').all()
     if request.method == 'POST':
-        sub = get_object_or_404(Submission, pk=request.POST.get('submission_id'))
+        sub = get_object_or_404(Submission, pk=request.POST.get('submission_id'), assignment=assignment)
         form = GradeSubmissionForm(request.POST, instance=sub)
         if form.is_valid():
             form.save()
