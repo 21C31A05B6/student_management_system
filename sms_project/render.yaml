@@ -26,10 +26,10 @@ services:
         value: "False"
 
       - key: DJANGO_ALLOWED_HOSTS
-        value: "student-management-system-iyku.onrender.com,student-management-system-n48c.onrender.com,.onrender.com,localhost,127.0.0.1"
+        value: "student-management-system-crn4.onrender.com,student-management-system-iyku.onrender.com,student-management-system-n48c.onrender.com,.onrender.com,localhost,127.0.0.1"
 
       - key: DJANGO_CSRF_TRUSTED_ORIGINS
-        value: "https://student-management-system-iyku.onrender.com,https://student-management-system-n48c.onrender.com,https://*.onrender.com"
+        value: "https://student-management-system-crn4.onrender.com,https://student-management-system-iyku.onrender.com,https://student-management-system-n48c.onrender.com,https://*.onrender.com"
 
       # SSL / Security headers
       - key: DJANGO_SECURE_SSL_REDIRECT

@@ -15,7 +15,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 raw_allowed_hosts = os.environ.get(
     'DJANGO_ALLOWED_HOSTS',
-    '127.0.0.1,localhost,student-management-system-iyku.onrender.com,student-management-system-n48c.onrender.com,.onrender.com'
+    '127.0.0.1,localhost,student-management-system-crn4.onrender.com,student-management-system-iyku.onrender.com,student-management-system-n48c.onrender.com,.onrender.com'
 )
 # Strip any protocol (http:// or https://) or paths if mistakenly provided in env var
 ALLOWED_HOSTS = [
@@ -26,7 +26,7 @@ ALLOWED_HOSTS = [
 # CSRF: trust Render domains and localhost (Django 4+ requires full origin https://...)
 raw_csrf_origins = os.environ.get(
     'DJANGO_CSRF_TRUSTED_ORIGINS',
-    'https://student-management-system-iyku.onrender.com,https://student-management-system-n48c.onrender.com,https://*.onrender.com,http://127.0.0.1:8000,http://localhost:8000'
+    'https://student-management-system-crn4.onrender.com,https://student-management-system-iyku.onrender.com,https://student-management-system-n48c.onrender.com,https://*.onrender.com,http://127.0.0.1:8000,http://localhost:8000'
 )
 CSRF_TRUSTED_ORIGINS = [
     o.strip() if o.strip().startswith(('http://', 'https://')) else f"https://{o.strip()}"
